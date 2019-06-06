@@ -1,0 +1,57 @@
+#ltp-container {
+	position: relative;
+	display: block;
+	padding: 20px 0px 0px 0px;
+	margin: 0;
+}
+
+#ltp-container #ltp-like-button {
+	background-image: url(../img/like.svg);
+	background-repeat: no-repeat;
+	background-position: center center;
+	background-color: lightgray;
+	border-radius: 5px;
+	display: inline-block;
+	position: relative;
+	vertical-align: middle;
+	border: none;
+	text-align: center;
+	width: 50px;
+	padding: 15px 0px;
+}
+
+#ltp-container #ltp-like-button:hover,
+#ltp-container #ltp-like-button:active,
+#ltp-container #ltp-like-button:focus {
+	outline: 0;
+}
+
+#ltp-container #ltp-like-count-box {
+	position: relative;
+	border-radius: 0.25em;
+	font-size: 12px;
+	text-decoration: none;
+	background-color: #fff;
+	margin-left: 5px;
+	line-height: 28px;
+	display: inline-block;
+	padding: 0 10px;
+	box-shadow: 0 0 0 1px #bdbdbd inset;
+	color: #616161;
+	vertical-align: middle;
+	text-align: center;
+}
+#ltp-container #ltp-like-count-box:before {
+	content: '';
+	position: absolute;
+	border: 1px solid transparent;
+	background: #ffffff;
+	border-bottom-color: #bdbdbd;
+	left: -5px;
+	top: 50%;
+	border-left-color: #bdbdbd;
+	transform: rotate(45deg) translatey(-50%);
+	width: 5px;
+	height: 5px;
+	margin: 0;
+}
