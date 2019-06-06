@@ -16,6 +16,7 @@ define("appDir", plugins_url('', __FILE__));
 define("incFolder", appDir . '/inc');
 define("cssFolder", incFolder . '/css');
 define("jsFolder", incFolder . '/js');
+define("ajaxPostUrl", plugins_url('',__FILE__) . '/ajax.php');
 
 function getCssFile(){
     $cssPath = cssFolder . '/css.css';
@@ -39,14 +40,47 @@ function likeButton($content){
     ';
 }
 
-function createTable() {
+function createSqlTable() {
+    global $wpdb;
 
+    $tableName = $wpdb->prefix . 'ltp_likes';
+    if($wpdb->get_var("show tables like '$tableName';") != $tableName){
+        $query = "create table $tableName (
+                    `id` bigint(20) NOT NULL AUTO_INCREMENT,
+                    `postId` bigint(20) NOT NULL,
+                    `ip` varchar(60) NOT NULL,
+                    `userId` bigint(20) NOT NULL,
+                    `status` int(1) NOT NULL,
+                    `createdAt` datetime NOT NULL,
+                    PRIMARY KEY (`id`));
+                ";
+        /*
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta( $query );
+        */
+        $wpdb->query($query);
+    }
 }
 
-register_activation_hook(__FILE__, 'createTable');
+function dropSqlTable() {
+    global $wpdb;
+
+    $tableName = $wpdb->prefix . 'ltp_likes';
+    $query = "drop table $tableName;";
+    $wpdb->query($query);
+}
+
+register_activation_hook(__FILE__, 'createSqlTable');
+register_deactivation_hook( __FILE__, 'dropSqlTable');
+
 add_filter('wp_head', 'getCssFile');
-add_filter('wp_footer', 'getJsFile');
+//add_filter('wp_footer', 'getJsFile');
 add_filter('the_content', 'likeButton');
 
+
+wp_enqueue_script( 'ltp', jsFolder . '/js.js', array( 'jquery' ), false, true );
+wp_localize_script( 'ltp', 'ltp_params', array(
+    'ajaxUrl' => ajaxPostUrl
+));
 
 ?>
