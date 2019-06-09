@@ -18,6 +18,7 @@ define("cssFolder", incFolder . '/css');
 define("jsFolder", incFolder . '/js');
 //define("ajaxPostUrl", plugins_url('',__FILE__) . '/ajax.php');
 define("ajaxPostUrl", admin_url('admin-ajax.php'));
+define("tableName", "ltp_likes");
 
 require_once('func.php');
 
@@ -39,7 +40,7 @@ function likeButton($content){
     return $content .= '
         <div id="ltp-container">
             <button id="ltp-like-button" data-post-id="'.$postId.'" data-user-id="'.get_current_user_id().'"></button>
-            <span id="ltp-like-count-box">0</span>
+            <span id="ltp-like-count-box-'.$postId.'" class="ltp-like-count-box">0</span>
         </div>
     ';
 }
@@ -47,21 +48,16 @@ function likeButton($content){
 function createSqlTable() {
     global $wpdb;
 
-    $tableName = $wpdb->prefix . 'ltp_likes';
-    if($wpdb->get_var("show tables like '$tableName';") != $tableName){
-        $query = "create table $tableName (
+    $tableName = $wpdb->prefix.tableName;
+    if($wpdb->get_var("show tables like '".$tableName."';") != $tableName){
+        $query = "create table ".$tableName." (
                     `id` bigint(20) NOT NULL AUTO_INCREMENT,
                     `postId` bigint(20) NOT NULL,
-                    `ip` varchar(60) NOT NULL,
                     `userId` bigint(20) NOT NULL,
                     `status` int(1) NOT NULL,
                     `createdAt` datetime NOT NULL,
                     PRIMARY KEY (`id`));
                 ";
-        /*
-        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        dbDelta( $query );
-        */
         $wpdb->query($query);
     }
 }
@@ -69,35 +65,63 @@ function createSqlTable() {
 function dropSqlTable() {
     global $wpdb;
 
-    $tableName = $wpdb->prefix . 'ltp_likes';
-    $query = "drop table $tableName;";
+    $tableName = $wpdb->prefix.tableName;
+    $query = "drop table ".$tableName.";";
     $wpdb->query($query);
 }
 
 function init(){
-    include(appDir . '/ajax.php');
+    
 }
 
 // ajax
 function ltpAddLike(){
-    global $wpdb;
-    
-    $getData = [
-        "postId"=>$_REQUEST['postId'],
-        "userId"=>$_REQUEST['userId']
-    ];
-    /*
-    $tableName = $wpdb->prefix . 'ltp_likes';
-    $queryCheck = "select id from ".$tableName." where postId=".$_POST['postId']." and userId=".$_POST['userId']." and ip='".getIp()."';";
-    print_r($queryCheck);
-    */
-    die();
+    if(DOING_AJAX){
+        global $wpdb;
 
+        $tableName = $wpdb->prefix.tableName;
+
+        $getData = [
+            "postId"=>$_REQUEST['postId'],
+            "userId"=>$_REQUEST['userId']
+        ];
+
+        // postmeta
+        $postMeta = get_post_meta($getData['postId'], 'ltpLikeCount', true); 
+
+        // check
+        $checkRow = $wpdb->get_results("select id,status from $tableName where postId=".$getData['postId']." and userId=".$getData['userId'].";");
+        if(count($checkRow)==0){
+            // insert
+            $wpdb->query("insert into $tableName (postId,userId,status,createdAt) values (".$getData['postId'].",".$getData['userId'].",1,'".current_time('Y-m-d H:i:s')."');");
+            $postMeta++;
+            $status = 1;
+        }else if(count($checkRow)>0 && $checkRow[0]->status==0){
+            // change to like from unlike
+            $wpdb->query("update $tableName set status=1 where id=".$checkRow[0]->id.";");
+            $postMeta++;
+            $status = 1;
+        }else if(count($checkRow)>0 && $checkRow[0]->status==1){
+            // change to unlike from like
+            $wpdb->query("update $tableName set status=0 where id=".$checkRow[0]->id.";");
+            $postMeta--;
+            $status = 0;
+        }
+
+        // update postmeta
+        update_post_meta($getData['postId'], 'ltpLikeCount', $postMeta);
+
+        // print result
+        print_r(json_encode(array("status"=>$status, "likeCount"=>$postMeta)));
+
+        die();
+    }
 }
 // end ajax
 
 register_activation_hook(__FILE__, 'createSqlTable');
-register_deactivation_hook( __FILE__, 'dropSqlTable');
+//register_deactivation_hook( __FILE__, 'dropSqlTable');
+register_uninstall_hook(__FILE__, 'dropSqlTable');
 
 // add css file to between head tags
 add_filter('wp_head', 'getCssFile');

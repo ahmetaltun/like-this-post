@@ -6,7 +6,7 @@ jQuery(document).ready(function($) {
 				url: ltp_params.ajaxUrl,
 				type: 'POST',
 				cache: false,
-				//dataType: 'json',
+				dataType: 'json',
 				data: {
 					action: 'ltpAddLike',
 					postId: $(this).data('post-id'),
@@ -18,7 +18,9 @@ jQuery(document).ready(function($) {
 				complete: function() {
 					_btn.attr('disabled', false);
 				},
-				success: function() {},
+				success: function(data) {
+					console.log(data.status);
+				},
 				error: function(msg) {
 					console.log(msg);
 				}
