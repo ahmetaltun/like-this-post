@@ -34,15 +34,29 @@ function getJsFile() {
 
 
 function likeButton($content){
-    // get post id
-    $postId = get_the_ID();
     
-    return $content .= '
-        <div id="ltp-container">
-            <button id="ltp-like-button" data-post-id="'.$postId.'" data-user-id="'.get_current_user_id().'"></button>
-            <span id="ltp-like-count-box-'.$postId.'" class="ltp-like-count-box">0</span>
-        </div>
-    ';
+    if(is_user_logged_in()){
+        // get post id
+        $postId = get_the_ID();
+        $userId = get_current_user_id();
+
+        // get likes
+        $likeCount = get_post_meta($postId, 'ltpLikeCount', true);
+
+        // check user liked or not
+        global $wpdb;
+        $tableName = $wpdb->prefix.tableName;
+        $currentUser = $wpdb->get_results("select id,status from $tableName where postId=$postId and userId=$userId;");
+
+        return $content .= '
+            <div id="ltp-container">
+                <button id="ltp-like-button" class="liked" data-post-id="'.$postId.'" data-user-id="'.$userId.'"></button>
+                <span id="ltp-like-count-box-'.$postId.'" class="ltp-like-count-box">'.$likeCount.'</span>
+            </div>
+        ';
+    }else{
+        return $content;
+    }
 }
 
 function createSqlTable() {
@@ -112,7 +126,7 @@ function ltpAddLike(){
         update_post_meta($getData['postId'], 'ltpLikeCount', $postMeta);
 
         // print result
-        print_r(json_encode(array("status"=>$status, "likeCount"=>$postMeta)));
+        print_r(json_encode(array("status"=>$status, "postId"=>$getData['postId'], "likeCount"=>$postMeta)));
 
         die();
     }

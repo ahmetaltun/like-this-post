@@ -19,7 +19,7 @@ jQuery(document).ready(function($) {
 					_btn.attr('disabled', false);
 				},
 				success: function(data) {
-					console.log(data.status);
+					$('#ltp-like-count-box-' + data.postId).html(data.likeCount);
 				},
 				error: function(msg) {
 					console.log(msg);
