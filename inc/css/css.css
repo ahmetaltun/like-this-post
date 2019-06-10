@@ -9,7 +9,6 @@
 	background-image: url(../img/like.svg);
 	background-repeat: no-repeat;
 	background-position: center center;
-	background-color: lightgray;
 	border-radius: 5px;
 	display: inline-block;
 	position: relative;
@@ -18,6 +17,22 @@
 	text-align: center;
 	width: 50px;
 	padding: 15px 0px;
+}
+
+#ltp-container .likeButtonIdle {
+	background-color: grey;
+}
+
+#ltp-container .likeButtonIdle:hover {
+	background-color: limegreen;
+}
+
+#ltp-container .likeButtonLike {
+	background-color: limegreen;
+}
+
+#ltp-container .likeButtonLike:hover {
+	background-color: crimson;
 }
 
 #ltp-container #ltp-like-button:hover,

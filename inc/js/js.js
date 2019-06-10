@@ -20,6 +20,9 @@ jQuery(document).ready(function($) {
 				},
 				success: function(data) {
 					$('#ltp-like-count-box-' + data.postId).html(data.likeCount);
+					data.status == 1
+						? _btn.attr('class', 'likeButtonLike')
+						: _btn.attr('class', 'likeButtonIdle');
 				},
 				error: function(msg) {
 					console.log(msg);

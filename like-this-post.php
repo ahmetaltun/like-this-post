@@ -47,10 +47,14 @@ function likeButton($content){
         global $wpdb;
         $tableName = $wpdb->prefix.tableName;
         $currentUser = $wpdb->get_results("select id,status from $tableName where postId=$postId and userId=$userId;");
-
+        if(count($currentUser)>0 && $currentUser[0]->status==1){
+            $btnClass = 'likeButtonLike';
+        }else{
+            $btnClass = 'likeButtonIdle';
+        }
         return $content .= '
             <div id="ltp-container">
-                <button id="ltp-like-button" class="liked" data-post-id="'.$postId.'" data-user-id="'.$userId.'"></button>
+                <button id="ltp-like-button" class="'.$btnClass.'" data-post-id="'.$postId.'" data-user-id="'.$userId.'"></button>
                 <span id="ltp-like-count-box-'.$postId.'" class="ltp-like-count-box">'.$likeCount.'</span>
             </div>
         ';
