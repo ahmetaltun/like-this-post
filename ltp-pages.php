@@ -9,9 +9,27 @@ class Page {
     }
 
     private static function getPages() {
+        // get tag count
+        $tagCount = wp_count_terms('post_tag');
+
+        // get tags
+        $tags = get_tags(array(
+            'number' => '30',
+            'offset' => '0',
+            'order' => 'desc',
+            'orderby' => 'count'            
+        ));
+        if ($tags) {
+            foreach($tags as $tag) {
+                $Tag .= '<span id="ltp-tags">'.$tag->name.'<span>'.$tag->count.'</span></span>';
+            }
+        }else{
+            $Tag = 'Tags not found.';
+        }
+
         $pages['show-tags'] = array(
             'title'   => 'Tags',
-            'content' => ''
+            'content' => $Tag
         );
 
         return $pages;
@@ -26,7 +44,7 @@ class Page {
         }
         if ( true === in_array(strtolower($wp->request), $pages_slugs)
              || ( true === isset($wp->query_vars['page_id'])
-                  && true === in_array( strtolower($wp->query_vars['page_id'] ), $pages_slugs)
+                  && true === in_array(strtolower($wp->query_vars['page_id']), $pages_slugs)
             )
         ) {
             if ( true === in_array(strtolower($wp->request), $pages_slugs)) {
